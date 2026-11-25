@@ -11,7 +11,7 @@ Every task and revision in this project goes through the specialist subagents in
 - `roblox-avatar-creator`: avatar cosmetics and UGC
 - `code-reviewer` before committing, `qa-tester` after building
 
-Those agent files have Dragon Tycoon context baked in. This is a different game, so always tell them that and pass the relevant section of `docs/` (the game design lives there once written).
+Those agent files have Dragon Tycoon context baked in. This is a different game (**Brickjaw Island**, a blocky dinosaur survival game), so always point agents at `docs/AGENT_BRIEF.md` first. `docs/PLAN.md` is the approved master plan and wins over the detail docs (`docs/01`–`06`). The MVP tickets T01–T14 are in PLAN.md §5.
 
 ## Workflow
 - Code lives as files in `src/` and syncs into Studio with Rojo (`sync.cmd`, which runs `.tools/rojo.exe serve default.project.json`). Don't edit scripts directly in Studio: Rojo would overwrite the change.
