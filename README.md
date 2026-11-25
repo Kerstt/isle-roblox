@@ -19,6 +19,7 @@ GitHub repo  <-- git push / pull -->  this folder (src/*.luau)  -- rojo serve --
 - **Don't create a Studio instance with one of those names yourself.** Rojo takes it over and replaces its contents.
 - **On the first Connect, read the plugin's confirm dialog** before accepting.
 - **Never publish a `rojo build` output** over the real place. It holds code only, no world.
+- **Temp files are ignored on purpose.** Rojo 7.7.1 crashes when a file vanishes while it's processing a change (open issue rojo-rbx/rojo#1314). Editors and Claude save files by writing `Name.tmp.<id>` and then renaming it, so `default.project.json` sets `globIgnorePaths` for `*.tmp.*`. Keep that line. `sync.cmd` and `scripts/serve.ps1` also restart Rojo automatically if it crashes for any other reason.
 
 ## Daily workflow
 

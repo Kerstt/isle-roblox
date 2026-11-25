@@ -33,6 +33,8 @@ local Definitions: { [string]: RemoteClass } = table.freeze({
 	Attack = "RemoteEvent",
 	Vocal = "RemoteEvent",
 	StopFeeding = "RemoteEvent",
+	-- Studio-only debug (the server's Guard gate drops every call outside Studio)
+	DebugSetStage = "RemoteEvent",
 	-- Server -> client
 	ProfileSync = "RemoteEvent",
 	LifeEvent = "RemoteEvent",

@@ -1,5 +1,6 @@
 {
 	"name": "isle-roblox",
+	"globIgnorePaths": ["**/*.tmp.*", "**/*.tmp", "**/*~"],
 	"tree": {
 		"$className": "DataModel",
 		"ReplicatedStorage": {
