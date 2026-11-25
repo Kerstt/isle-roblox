@@ -274,8 +274,7 @@ local function step(rig: Rig, root: BasePart, humanoid: Humanoid, dt: number, an
 	local scale = rig.scale
 	local velocity = root.AssemblyLinearVelocity
 	local speed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
-	local airborne = AIRBORNE_STATES[humanoid:GetState()] == true
-		or math.abs(velocity.Y) > PARAMS.airborneVerticalSpeed
+	local airborne = AIRBORNE_STATES[humanoid:GetState()] == true or math.abs(velocity.Y) > PARAMS.airborneVerticalSpeed
 	local grounded = not airborne
 
 	-- Gait amount follows speed (relative to the dino's size), smoothed so starts and stops blend.

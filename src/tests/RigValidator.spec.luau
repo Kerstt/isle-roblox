@@ -209,7 +209,8 @@ return function(t: TestKit.Context)
 		t.it("flags a joint with the wrong parent bone", function()
 			expectError("expected Neck1", function(model)
 				local head = model:FindFirstChild("Head") :: BasePart
-				(head:FindFirstChild("J_Head") :: Motor6D).Part0 = model:FindFirstChild("Torso") :: BasePart
+				local joint = head:FindFirstChild("J_Head") :: Motor6D
+				joint.Part0 = model:FindFirstChild("Torso") :: BasePart
 			end)
 		end)
 		t.it("flags a missing required bone", function()
