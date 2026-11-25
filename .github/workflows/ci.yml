@@ -38,5 +38,8 @@ jobs:
       - name: Lint (Selene)
         run: selene src
 
+      - name: Unit tests (Lune)
+        run: lune run scripts/run-tests
+
       - name: Build place (Rojo)
         run: rojo build default.project.json -o build.rbxl

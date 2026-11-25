@@ -12,7 +12,7 @@ GitHub repo  <-- git push / pull -->  this folder (src/*.luau)  -- rojo serve --
 
 - **Scripts** come from the files in `src/`. Edit them here, not in Studio. Rojo pushes every save into Studio live.
 - **The world** (Workspace, Lighting, StarterGui, and so on) is built in Studio and saved to Roblox. Rojo never touches it.
-- **CI** runs on pushes to `main` and on pull requests: StyLua format check, Selene lint, and a Rojo build.
+- **CI** runs on pushes to `main` and on pull requests: StyLua format check, Selene lint, unit tests (Lune), and a Rojo build.
 
 ### Rojo rules that protect your work
 - **Don't build things in Studio *inside* Rojo's folders** (`Shared`, `Server`, `Modules`, `Tests`, `Client`). Rojo owns those, and anything Studio-made in them is deleted on connect. Put RemoteEvents, models and so on *next to* them, or create them from code.
@@ -43,5 +43,5 @@ GitHub repo  <-- git push / pull -->  this folder (src/*.luau)  -- rojo serve --
 ## Setup on a new PC
 
 - Download `rojo-7.7.1-windows-x86_64.zip` from [Rojo's releases](https://github.com/rojo-rbx/rojo/releases/tag/v7.7.1) and put `rojo.exe` in `.tools/` (gitignored). `sync.cmd` uses that path.
-- Optional: [Rokit](https://github.com/rojo-rbx/rokit) + `rokit install` puts the pinned Rojo, StyLua and Selene from `rokit.toml` on your PATH (for running the CI checks locally).
+- Optional: [Rokit](https://github.com/rojo-rbx/rokit) + `rokit install` puts the pinned Rojo, StyLua, Selene and Lune from `rokit.toml` on your PATH (for running the CI checks locally; `lune run scripts/run-tests` runs the unit tests).
 - Install the Studio plugin once: `.tools\rojo.exe plugin install`.

@@ -1,0 +1,205 @@
+--!strict
+local TestKit = require(script.Parent.TestKit)
+
+return function(t: TestKit.Context)
+	local Signal = t.load("Shared/Signal")
+	local expect = t.expect
+
+	t.describe("Signal:Connect and Fire", function()
+		t.it("passes every argument to the handler, including nil in the middle", function()
+			local signal = Signal.new()
+			local received
+			signal:Connect(function(...)
+				received = table.pack(...)
+			end)
+			signal:Fire("a", nil, 3)
+			expect(received.n).toBe(3)
+			expect(received[1]).toBe("a")
+			expect(received[2]).toBeNil()
+			expect(received[3]).toBe(3)
+		end)
+		t.it("calls every handler in connection order, synchronously", function()
+			local signal = Signal.new()
+			local order = {}
+			signal:Connect(function()
+				table.insert(order, 1)
+			end)
+			signal:Connect(function()
+				table.insert(order, 2)
+			end)
+			signal:Fire()
+			expect(order).toEqual({ 1, 2 })
+		end)
+	end)
+
+	t.describe("Connection:Disconnect", function()
+		t.it("stops the handler and marks the connection", function()
+			local signal = Signal.new()
+			local calls = 0
+			local connection = signal:Connect(function()
+				calls += 1
+			end)
+			signal:Fire()
+			connection:Disconnect()
+			signal:Fire()
+			expect(calls).toBe(1)
+			expect(connection.Connected).toBe(false)
+		end)
+		t.it("is safe to call twice", function()
+			local signal = Signal.new()
+			local connection = signal:Connect(function() end)
+			connection:Disconnect()
+			expect(function()
+				connection:Disconnect()
+			end).never.toThrow()
+		end)
+		t.it("skips a handler disconnected by an earlier handler in the same Fire", function()
+			local signal = Signal.new()
+			local secondCalls = 0
+			local second
+			signal:Connect(function()
+				second:Disconnect()
+			end)
+			second = signal:Connect(function()
+				secondCalls += 1
+			end)
+			signal:Fire()
+			expect(secondCalls).toBe(0)
+		end)
+		t.it("does not call a handler connected during a Fire until the next Fire", function()
+			local signal = Signal.new()
+			local lateCalls = 0
+			local connected = false
+			signal:Connect(function()
+				if not connected then
+					connected = true
+					signal:Connect(function()
+						lateCalls += 1
+					end)
+				end
+			end)
+			signal:Fire()
+			expect(lateCalls).toBe(0)
+			signal:Fire()
+			expect(lateCalls).toBe(1)
+		end)
+	end)
+
+	t.describe("Signal:Once", function()
+		t.it("runs the handler on the first Fire only", function()
+			local signal = Signal.new()
+			local values = {}
+			signal:Once(function(value)
+				table.insert(values, value)
+			end)
+			signal:Fire(1)
+			signal:Fire(2)
+			expect(values).toEqual({ 1 })
+		end)
+	end)
+
+	t.describe("Signal:Wait", function()
+		t.it("resumes the waiting thread with the fired values", function()
+			local signal = Signal.new()
+			local got
+			task.spawn(function()
+				got = table.pack(signal:Wait())
+			end)
+			expect(got).toBeNil()
+			signal:Fire("x", 2)
+			expect(got.n).toBe(2)
+			expect(got[1]).toBe("x")
+			expect(got[2]).toBe(2)
+		end)
+	end)
+
+	t.describe("Signal:DisconnectAll", function()
+		t.it("disconnects every handler", function()
+			local signal = Signal.new()
+			local calls = 0
+			local connection = signal:Connect(function()
+				calls += 1
+			end)
+			signal:Connect(function()
+				calls += 1
+			end)
+			signal:DisconnectAll()
+			signal:Fire()
+			expect(calls).toBe(0)
+			expect(connection.Connected).toBe(false)
+		end)
+	end)
+
+	t.describe("Signal edge cases", function()
+		t.it("keeps calling later handlers after one errors", function()
+			-- The error below is expected: it is reported in its own thread (red in the Studio output).
+			local signal = Signal.new()
+			local later = 0
+			signal:Connect(function()
+				error("[expected test error] Signal.spec: an erroring handler")
+			end)
+			signal:Connect(function()
+				later += 1
+			end)
+			expect(function()
+				signal:Fire()
+			end).never.toThrow()
+			expect(later).toBe(1)
+		end)
+		t.it("never runs a Once handler that was disconnected before Fire", function()
+			local signal = Signal.new()
+			local calls = 0
+			local connection = signal:Once(function()
+				calls += 1
+			end)
+			connection:Disconnect()
+			signal:Fire()
+			expect(calls).toBe(0)
+		end)
+		t.it("resumes two concurrent waiters with the same values", function()
+			local signal = Signal.new()
+			local first, second
+			task.spawn(function()
+				first = signal:Wait()
+			end)
+			task.spawn(function()
+				second = signal:Wait()
+			end)
+			signal:Fire("go")
+			expect(first).toBe("go")
+			expect(second).toBe("go")
+		end)
+		t.it("skips the remaining handlers when one calls DisconnectAll during Fire", function()
+			local signal = Signal.new()
+			local laterCalls = 0
+			signal:Connect(function()
+				signal:DisconnectAll()
+			end)
+			signal:Connect(function()
+				laterCalls += 1
+			end)
+			signal:Fire()
+			signal:Fire()
+			expect(laterCalls).toBe(0)
+		end)
+		t.it("does not resume a waiter that was cancelled", function()
+			local signal = Signal.new()
+			local resumed = false
+			local waiter = task.spawn(function()
+				signal:Wait()
+				resumed = true
+			end)
+			task.cancel(waiter)
+			local afterCalls = 0
+			signal:Connect(function()
+				afterCalls += 1
+			end)
+			expect(function()
+				signal:Fire()
+			end).never.toThrow()
+			expect(resumed).toBe(false)
+			expect(afterCalls).toBe(1)
+			expect(coroutine.status(waiter)).toBe("dead")
+		end)
+	end)
+end

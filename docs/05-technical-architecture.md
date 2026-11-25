@@ -505,7 +505,7 @@ end
 | Runner | How `t.load` resolves | How to run |
 |---|---|---|
 | Studio | `"Shared/..."` → `ReplicatedStorage.Shared...`, `"Modules/..."` → `ServerStorage.Modules...` | `require(game.ServerStorage.Tests.RunAll)()` from the command bar or the Roblox_Studio MCP `execute_luau`; prints pass/fail |
-| Lune (CI and local) | `"Shared/..."` → `src/shared/...` file path (`init.luau` aware) | `lune run scripts/test` (runner lives outside `src/`, so Rojo never syncs it) |
+| Lune (CI and local) | `"Shared/..."` → `src/shared/...` file path (`init.luau` aware) | `lune run scripts/run-tests` (runner lives outside `src/`, so Rojo never syncs it) |
 
 `Vector3`/`CFrame` are not Lune globals: the Lune runner injects them from `@lune/roblox`. If a datatype method the Hitbox math needs is missing there, that module keeps its math in plain numbers.
 
@@ -516,7 +516,7 @@ Integration checks stay manual for MVP: Studio play-test (2 clients) through the
 | Step | Status |
 |---|---|
 | StyLua check, Selene lint, Rojo build | Exists |
-| `lune run scripts/test` | Add in T01 (Lune pinned in `rokit.toml`) |
+| `lune run scripts/run-tests` | Add in T01 (Lune pinned in `rokit.toml`) |
 | `luau-lsp analyze` with `rojo sourcemap` and Roblox type definitions (`--!strict` type check) | Add after MVP; catches type errors the build does not |
 | In-engine tests via Open Cloud Luau Execution on a test place | Later, optional: needs an API key secret, and secrets are not available to fork PRs on this public repo |
 
